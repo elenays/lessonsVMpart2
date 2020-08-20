@@ -1,33 +1,44 @@
-
-const users = [
-    { name: 'Igor', age: 30, email: 'igor@mail.ru' },
-    { name: 'Elena', age: 23, email: 'elena@mail.ru' },
-
-]
+const Todo = require('../models/todo')
 
 
 module.exports = {
-    test() {
-        return {
-            count: Math.trunc(Math.random() * 10),
-            users
+    async getTodos() {
+        try {
+            return await Todo.findAll()
+        } catch (err) {
+            throw new Error('Fetch todos is not available')
         }
     },
-    random({ min, max, count }) {
-        const arr = []
-        for (let i = 0; i < count; i++) {
-            const random = Math.random() * (max - min) + min
-            arr.push(random)
+    async createTodo({ todo }) {
+        try {
+            return await Todo.create({
+                title: todo.title,
+                done: false
+            })
+        } catch (err) {
+            throw new Error('Title is required')
         }
-        return arr
     },
-    addTestUser({ user: name, email }) {
-        const user = {
-            name, email,
-            age: Math.ceil(Math.random() * 30)
+    async completeTodo({ id }) {
+        try {
+            const todo = await Todo.findByPk(id)
+            todo.done = true
+            await todo.save()
+            return todo
+        } catch (err) {
+            throw new Error('Id is required')
         }
-
-        user.push(user)
-        return user
+    },
+    async deleteTodo({ id }) {
+        try {
+            const todos = await Todo.findAll({
+                where: { id }
+            })
+            await todos[0].destroy()
+            return true
+        } catch (err) {
+            throw new Error('Id is required')
+            return false
+        }
     }
 }
